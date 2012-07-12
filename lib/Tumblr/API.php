@@ -84,7 +84,7 @@ class API extends \Tumblr\API\Request
 			$obj->raw_posts = $obj->posts;
 			$obj->posts = array();
 			foreach($obj->raw_posts as $key=>$post) {
-				$class_name = "Tumblr\\Post\\" . $post->type;
+				$class_name = "Tumblr\\Post\\" . ucfirst($post->type);
 				$obj->posts[$key] = new $class_name($post);
 			}
 		}
@@ -108,11 +108,17 @@ class API extends \Tumblr\API\Request
 	}
 	
 	public static function reblogPost($id, $reblog_key, $comment = "") {
-		$options = array(
-			"id" => $id,
-			"reblog_key" => $reblog_key,
-			"comment" => $comment
-		);
+        if(is_array($comment)) {
+            $options = $comment;
+            $options['id'] = $id;
+            $options['reblog_key'] = $reblog_key;
+        } else {
+            $options = array(
+                "id" => $id,
+                "reblog_key" => $reblog_key,
+                "comment" => $comment
+            );
+        }
 		
 		$instance = self::getInstance();
 		return $instance->request("POST", "/post/reblog", $options);
